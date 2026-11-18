@@ -210,3 +210,14 @@ async def test_endpoint_recovers_after_loss_and_close_is_idempotent(client, peer
     await client.async_close()
     await client.async_close()
     assert transport.is_closing()
+
+
+async def test_hostname_resolution_times_out(monkeypatch):
+    async def resolve(*args, **kwargs):
+        await asyncio.Event().wait()
+
+    monkeypatch.setattr(asyncio.get_running_loop(), "getaddrinfo", resolve)
+    async with AsyncVents("vents-ahu.example", DEVICE.decode(), timeout=0.02) as client:
+        async with asyncio.timeout(1):
+            with pytest.raises(VentsConnectionError, match="Timed out resolving"):
+                await client.async_read_register(POWER_ON)

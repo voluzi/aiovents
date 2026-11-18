@@ -106,10 +106,16 @@ class AsyncVents:
 
     async def _resolve_host(self) -> str:
         try:
-            addresses = await asyncio.get_running_loop().getaddrinfo(
-                self._host, self._port, family=socket.AF_INET, type=socket.SOCK_DGRAM
-            )
+            async with asyncio.timeout(self._timeout * 2):
+                addresses = await asyncio.get_running_loop().getaddrinfo(
+                    self._host,
+                    self._port,
+                    family=socket.AF_INET,
+                    type=socket.SOCK_DGRAM,
+                )
             return str(addresses[0][4][0])
+        except TimeoutError as exc:
+            raise VentsConnectionError("Timed out resolving device address") from exc
         except (OSError, IndexError) as exc:
             raise VentsConnectionError(f"Cannot resolve device address: {exc}") from exc
 
