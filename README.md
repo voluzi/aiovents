@@ -32,7 +32,9 @@ values are `None`. Temperatures are signed Celsius values, and the filter countd
 For individual registers, use `async_read_register()` or `async_read_registers()` with definitions
 from `aiovents.registers`.
 
-Writes are verified against the device echo or by reading back the register. For example,
+Writes are verified against the device echo or by reading back the register. If the write
+reply times out, the async client still reads the register to check whether the device applied
+the write. The reference sync client raises on that timeout without reading back. For example,
 `await client.async_write_register(SPEED, FanSpeed.LOW)` requests low fan speed and returns
 the confirmed value, which can differ from the request. `SPEED` is available from
 `aiovents.registers`, and `FanSpeed` from `aiovents`.
