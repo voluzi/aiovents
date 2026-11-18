@@ -1,7 +1,7 @@
 # aiovents
 
 [![PyPI version](https://img.shields.io/pypi/v/aiovents)](https://pypi.org/project/aiovents/)
-[![Python versions](https://img.shields.io/badge/Python-3.11%20%7C%203.12%20%7C%203.13-3776AB)](https://pypi.org/project/aiovents/)
+[![Python versions](https://img.shields.io/badge/Python-3.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-3776AB)](https://pypi.org/project/aiovents/)
 [![Latest GitHub release](https://img.shields.io/github/v/release/voluzi/aiovents)](https://github.com/voluzi/aiovents/releases/latest)
 [![CI](https://github.com/voluzi/aiovents/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/voluzi/aiovents/actions/workflows/ci.yml)
 [![MIT license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
@@ -70,7 +70,7 @@ the write reply times out.
 ## Compatibility
 
 Requires Python **3.11 or later** and has no runtime dependencies. CI tests
-Python 3.11, 3.12, and 3.13. The package includes type information.
+Python 3.11, 3.12, 3.13, and 3.14. The package includes type information.
 
 Use a controller and firmware that implement the Vents AHU UDP register
 protocol. A Vents or Blauberg model name alone does not establish
