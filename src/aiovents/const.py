@@ -1,0 +1,14 @@
+"""Protocol and client defaults."""
+
+PACKET_PREFIX = b"\xfd\xfd"
+PROTOCOL_TYPE = b"\x03"
+SIZE_ID = b"\x10"
+
+PARAMETER_READ = b"\x01"
+PARAMETER_WRITE = b"\x02"
+PARAMETER_WRITE_WITH_RESPONSE = b"\x03"
+RESPONSE = b"\x06"
+
+DEFAULT_PORT = 4000
+DEFAULT_PASSWORD = "1111"
+DEFAULT_TIMEOUT = 1.5
