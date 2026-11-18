@@ -1,0 +1,29 @@
+name: Bug report
+description: Report a reproducible problem with aiovents.
+body:
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: Include the aiovents version and the Python version and operating system.
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device model and firmware
+      description: Share the model and firmware version if relevant. Omit serial numbers and device IDs.
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Include what happened and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostics and logs
+      description: >-
+        Include the traceback and a synthetic request or response if available.
+        Remove private IP addresses, hostnames, identifiers, credentials and location details before posting.
