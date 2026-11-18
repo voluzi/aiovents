@@ -1,10 +1,17 @@
 # Changelog
 
-## 0.1.0
+All notable changes to this project are documented here. The format follows
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project uses
+[Semantic Versioning](https://semver.org/).
 
-- Add an asynchronous Vents AHU client with batched status and fan settings reads.
-- Verify reply sender, device ID, checksum, and exact register set.
-- Decode signed temperatures and filter countdowns and expose unsupported values as missing.
-- Verify compact writes and read back on an unconfirmed echo or reply timeout. The reference
-  sync client does not read back on timeout.
-- Support filter reset.
+## [0.1.0] - 2026-11-18
+
+### Added
+
+- Async UDP client with typed, batched status and fan settings reads.
+- Reply validation for sender address, device ID, checksum, and register set.
+- Signed temperatures and filter countdowns, with unsupported values represented as missing.
+- Write confirmation by device echo or register readback, including after a reply timeout.
+- Filter reset and bounded hostname resolution.
+
+[0.1.0]: https://github.com/voluzi/aiovents/tree/v0.1.0

@@ -1,61 +1,93 @@
 # aiovents
 
-An asyncio UDP client for Vents and Blauberg air handling units that use the Vents AHU protocol.
-It requires Python 3.11 or newer and has no runtime dependencies.
+[![PyPI version](https://img.shields.io/pypi/v/aiovents)](https://pypi.org/project/aiovents/)
+[![Python versions](https://img.shields.io/badge/Python-3.11%20%7C%203.12%20%7C%203.13-3776AB)](https://pypi.org/project/aiovents/)
+[![Latest GitHub release](https://img.shields.io/github/v/release/voluzi/aiovents)](https://github.com/voluzi/aiovents/releases/latest)
+[![CI](https://github.com/voluzi/aiovents/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/voluzi/aiovents/actions/workflows/ci.yml)
+[![MIT license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-## Usage
+A typed asyncio client for Vents and Blauberg air handling units on a local
+network. Read operating data and fan settings in batches, write individual
+registers, and reset the filter counter.
+
+## Install
+
+```sh
+python -m pip install aiovents
+```
+
+## Quick start
+
+Set `VENTS_HOST`, `VENTS_DEVICE_ID`, and `VENTS_PASSWORD` in your environment.
 
 ```python
 import asyncio
+import os
 
 from aiovents import AsyncVents, VentsStatus
 
 
-async def read_status() -> VentsStatus:
+async def read_unit() -> VentsStatus:
     async with AsyncVents(
-        "vents-ahu.example",
-        "0000000000000000",
-        password="example-password",
-    ) as client:
-        return await client.async_get_status()
+        os.environ["VENTS_HOST"],
+        os.environ["VENTS_DEVICE_ID"],
+        password=os.environ["VENTS_PASSWORD"],
+    ) as unit:
+        return await unit.async_get_status()
 
 
-status = asyncio.run(read_status())
+status = asyncio.run(read_unit())
+print(f"Exhaust inlet temperature: {status.exhaust_in_temperature} °C")
+print(f"Filter days remaining: {status.filter_days_remaining}")
 ```
 
-The default UDP port is 4000 and the reply timeout is 1.5 seconds. The device ID must
-contain 1 to 16 ASCII characters; IDs shorter than 16 characters are padded on the right
-with zeroes. Supply the unit's configured password; omitting it uses the protocol default.
+## API
 
-`async_get_status()` and `async_get_settings()` each read one batch. Unsupported or unreadable
-values are `None`. Temperatures are signed Celsius values, and the filter countdown is in days.
-For individual registers, use `async_read_register()` or `async_read_registers()` with definitions
-from `aiovents.registers`.
+| API | Purpose |
+| --- | --- |
+| `AsyncVents(host, device_id, *, port=4000, password=..., timeout=1.5)` | Create a UDP client. The timeout is in seconds. Omit the password only when the unit uses the protocol default. |
+| `async_get_status()` | Read a `VentsStatus` snapshot with power, mode, speeds, temperatures, humidity, alarms, and filter status. |
+| `async_get_settings()` | Read a `VentsSettings` snapshot with three supply fan and three exhaust fan settings. |
+| `async_read_register(register)`, `async_read_registers(registers)` | Read one register or a batch of registers defined in [`aiovents.registers`](src/aiovents/registers.py). |
+| `async_write_register(register, value)` | Validate a write and return the confirmed value, which can differ from the request. |
+| `async_trigger(register)` | Send a supported trigger. |
+| `async_reset_filter()` | Send both filter reset triggers. The unit does not acknowledge them; check the next status read. |
+| `async_close()` | Release the UDP socket. The async context manager also closes it. |
 
-Writes are verified against the device echo or by reading back the register. If the write
-reply times out, the async client still reads the register to check whether the device applied
-the write. The reference sync client raises on that timeout without reading back. For example,
-`await client.async_write_register(SPEED, FanSpeed.LOW)` requests low fan speed and returns
-the confirmed value, which can differ from the request. `SPEED` is available from
-`aiovents.registers`, and `FanSpeed` from `aiovents`.
+Unsupported or unreadable register values are `None`. Temperatures are in
+degrees Celsius and the filter countdown is in days. Writes are checked
+against the unit's reply or by reading the register back, including when
+the write reply times out.
 
-`async_reset_filter()` sends two unacknowledged triggers; read the status to check whether
-the countdown reset. The client serializes operations, accepts matching replies from the unit's
-IP regardless of source port, and refreshes DNS after three consecutive request failures.
-An unreachable device raises `VentsConnectionError`. The async context manager releases the
-UDP socket.
+## Errors
 
-## Development
+| Error | Meaning |
+| --- | --- |
+| `VentsError` | Base class for client and protocol errors |
+| `VentsConnectionError` | The device could not be reached or no valid reply arrived |
+| `VentsValueError` | Invalid device credential, register, or requested value; also a `ValueError` |
 
-```sh
-python -m pip install -e '.[dev]'
-ruff check .
-ruff format --check .
-mypy --strict src
-pytest -q
-python -m build
-```
+## Compatibility
 
-The tests use synthetic frames and loopback UDP peers.
+Requires Python **3.11 or later** and has no runtime dependencies. CI tests
+Python 3.11, 3.12, and 3.13. The package includes type information.
 
-MIT license.
+Use a controller and firmware that implement the Vents AHU UDP register
+protocol. A Vents or Blauberg model name alone does not establish
+compatibility. The device ID must contain 1–16 ASCII characters; the client
+pads shorter IDs on the right with zeroes. Credentials are sent without
+encryption, so keep the UDP service on your local network.
+
+The client serializes traffic and accepts matching replies from the unit's
+address regardless of source port. It refreshes DNS after three consecutive
+request failures.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development and test instructions,
+[CHANGELOG.md](CHANGELOG.md) for release notes, and [SECURITY.md](SECURITY.md)
+for private vulnerability reporting.
+
+## License
+
+[MIT](LICENSE).
